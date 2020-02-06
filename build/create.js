@@ -1,18 +1,18 @@
 const fs = require('fs')
 const path = require('path')
 
-let projectName = process.argv[2]
-let srcDir = path.resolve(__dirname, '../template')
-let tarDir = path.resolve(__dirname, '../src/' + projectName)
+const projectName = process.argv[2]
+const srcDir = path.resolve(__dirname, '../template')
+const tarDir = path.resolve(__dirname, '../src/' + projectName)
 
 if (!projectName) {
-  throw '新建项目名称不能为空：npm run create projectName'
+  throw new Error('新建项目名称不能为空：npm run create projectName')
 }
 
 if (fs.existsSync(tarDir)) {
-  throw tarDir + ' 项目已已存在'
+  throw new Error(tarDir + ' 项目已已存在')
 } else {
-  fs.mkdir(tarDir, function(err) {
+  fs.mkdir(tarDir, function (err) {
     if (err) {
       console.log(err)
       return
@@ -23,9 +23,9 @@ if (fs.existsSync(tarDir)) {
 
 // 将源文件拷贝到目标文件
 // 将srcPath路径的文件复制到tarPath
-var copyFile = function(srcPath, tarPath, cb) {
+var copyFile = function (srcPath, tarPath, cb) {
   var rs = fs.createReadStream(srcPath)
-  rs.on('error', function(err) {
+  rs.on('error', function (err) {
     if (err) {
       console.log('read error', srcPath)
     }
@@ -33,13 +33,13 @@ var copyFile = function(srcPath, tarPath, cb) {
   })
 
   var ws = fs.createWriteStream(tarPath)
-  ws.on('error', function(err) {
+  ws.on('error', function (err) {
     if (err) {
       console.log('write error', tarPath)
     }
     cb && cb(err)
   })
-  ws.on('close', function(ex) {
+  ws.on('close', function (ex) {
     cb && cb(ex)
   })
 
@@ -47,11 +47,11 @@ var copyFile = function(srcPath, tarPath, cb) {
 }
 
 // 将srcDir文件下的文件、文件夹递归的复制到tarDir下
-var copyFolder = function(srcDir, tarDir, cb) {
-  fs.readdir(srcDir, function(err, files) {
+var copyFolder = function (srcDir, tarDir, cb) {
+  fs.readdir(srcDir, function (err, files) {
     var count = 0
-    var checkEnd = function() {
-      ++count == files.length && cb && cb()
+    var checkEnd = function () {
+      ++count === files.length && cb && cb()
     }
 
     if (err) {
@@ -59,14 +59,17 @@ var copyFolder = function(srcDir, tarDir, cb) {
       return
     }
 
-    files.forEach(function(file) {
+    files.forEach(function (file) {
       var srcPath = path.join(srcDir, file)
       var tarPath = path.join(tarDir, file)
 
-      fs.stat(srcPath, function(err, stats) {
+      fs.stat(srcPath, function (err, stats) {
+        if (err) {
+          console.log(err)
+        }
         if (stats.isDirectory()) {
           console.log('mkdir', tarPath)
-          fs.mkdir(tarPath, function(err) {
+          fs.mkdir(tarPath, function (err) {
             if (err) {
               console.log(err)
               return
@@ -80,7 +83,7 @@ var copyFolder = function(srcDir, tarDir, cb) {
       })
     })
 
-    //为空时直接回调
+    // 为空时直接回调
     files.length === 0 && cb && cb()
   })
 }

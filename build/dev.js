@@ -1,13 +1,13 @@
-let fs = require('fs')
-let projectName = process.argv[2]
+const fs = require('fs')
+const projectName = process.argv[2]
 
-fs.readFile('./config/projectConfig.json', function(err, data) {
+fs.readFile('./config/projectConfig.json', function (err, data) {
   if (err) {
     console.error(err)
   }
   data = JSON.parse(data.toString())
 
-  if (projectName && projectName != 'template') {
+  if (projectName && projectName !== 'template') {
     data.name = projectName
     data.srcPath = './src/' + projectName + '/'
     data.distPath = '../deploy/' + projectName + '/'
@@ -18,14 +18,14 @@ fs.readFile('./config/projectConfig.json', function(err, data) {
   }
   data.publicPath = '/'
 
-  fs.writeFile('./config/projectConfig.json', JSON.stringify(data), function(
+  fs.writeFile('./config/projectConfig.json', JSON.stringify(data), function (
     err
   ) {
     if (err) {
       console.error(err)
     }
 
-    let exec = require('child_process').execSync
+    const exec = require('child_process').execSync
     exec(
       'webpack-dev-server --config config/webpack.dev.conf.js --env.mode=development',
       { stdio: 'inherit' }

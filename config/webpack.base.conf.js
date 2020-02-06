@@ -4,25 +4,26 @@ const glob = require('glob')
 const projectConfig = require('./projectConfig.json')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 const resolve = dir => path.join(__dirname, '..', dir)
 
 const htmlPluginArray = []
 
-function getEntry() {
+function getEntry () {
   const entry = {}
   const pages = glob.sync(projectConfig.srcPath + 'pages/**?/index.js')
   pages.forEach(filePath => {
-      const pageName = filePath.match(/\/pages\/(.+)\/index.js/)[1]
-      entry[pageName] = filePath
-      // 实例化插件
-      htmlPluginArray.push(
-        new HtmlWebpackPlugin({
-          filename: pages.length === 1 ? 'index.html' : pageName + '.html',
-          template: projectConfig.srcPath + 'pages/' + pageName + '/' + pageName + '.html'
-        })
-      )
-    })
+    const pageName = filePath.match(/\/pages\/(.+)\/index.js/)[1]
+    entry[pageName] = filePath
+    // 实例化插件
+    htmlPluginArray.push(
+      new HtmlWebpackPlugin({
+        filename: pages.length === 1 ? 'index.html' : pageName + '.html',
+        template: projectConfig.srcPath + 'pages/' + pageName + '/' + pageName + '.html'
+      })
+    )
+  })
   return entry
 }
 
@@ -35,6 +36,12 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader',
+        exclude: /node_modules/,
+        include: resolve('src')
+      },
       {
         test: /\.jsx?$/,
         use: [
@@ -63,7 +70,7 @@ module.exports = {
           'less-loader'
         ],
         exclude: /node_modules/,
-        include: path.resolve(__dirname, 'src')
+        include: resolve('src')
       },
       {
         test: /\.scss/,
@@ -91,6 +98,7 @@ module.exports = {
   },
   plugins: [
     ...htmlPluginArray,
+    new VueLoaderPlugin(),
     new MiniCssExtractPlugin({
       filename: 'css/[name]-[contenthash:8].css'
     })
